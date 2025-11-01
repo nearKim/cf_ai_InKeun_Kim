@@ -3,12 +3,29 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "effect": "^3.18.4"
+  },
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "@effect/schema": "^0.75.5",
+    "@types/node": "^24.9.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "@vitest/ui": "^4.0.6",
+    "eslint": "^9.39.0",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "typescript": "^5.5.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.6"
   },
   "private": true
 }
