@@ -1,5 +1,6 @@
 import {describe, it, expect} from "vitest";
 import {Effect} from "effect";
+import * as SessionId from '../SessionId'
 
 describe('SessionId', () => {
     describe('make', () => {
