@@ -1,4 +1,4 @@
-import { Effect } from "effect"
+import { Data, Effect } from "effect"
 import * as EffectType from "effect/Effect"
 import { Schema } from "@effect/schema"
 
@@ -13,14 +13,12 @@ export type LLMProviderHint =
   | { readonly _tag: 'OpenAI' }
   | { readonly _tag: 'Gemini' }
 
-export class InvalidLLMProviderHintError {
-  readonly _tag = 'InvalidLLMProviderHintError'
-
-  constructor(
-    readonly message: string,
-    readonly input: unknown
-  ) {}
-}
+export class InvalidLLMProviderHintError extends Data.TaggedError(
+  'InvalidLLMProviderHintError'
+)<{
+  readonly message: string
+  readonly input: unknown
+}> {}
 
 const LLMProviderHintSchema = Schema.compose(
   Schema.compose(Schema.Trim, Schema.Lowercase),
@@ -39,10 +37,10 @@ export const make = (value: string): EffectType.Effect<LLMProviderHint, InvalidL
   Schema.decodeUnknown(LLMProviderHintSchema)(value).pipe(
     Effect.mapError(
       (parseError) =>
-        new InvalidLLMProviderHintError(
-          `Invalid LLM provider: ${parseError.message}. Must be one of: ${Object.values(PROVIDERS).join(', ')}`,
-          value
-        )
+        new InvalidLLMProviderHintError({
+          message: `Invalid LLM provider: ${parseError.message}. Must be one of: ${Object.values(PROVIDERS).join(', ')}`,
+          input: value
+        })
     ),
     Effect.map((provider): LLMProviderHint => {
       switch (provider) {

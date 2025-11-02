@@ -1,4 +1,4 @@
-import {Brand, Effect, pipe} from "effect";
+import {Brand, Data, Effect, pipe} from "effect";
 import * as BrandType from "effect/Brand";
 import * as EffectType from "effect/Effect";
 import {Schema} from '@effect/schema'
@@ -7,15 +7,12 @@ export type RequestId = string & BrandType.Brand<'RequestId'>
 
 const RequestIdBrand = Brand.nominal<RequestId>()
 
-export class InvalidRequestIdError {
-  readonly _tag = 'InvalidRequestIdError'
-
-  constructor(
-    readonly message: string,
-    readonly input: string
-  ) {
-  }
-}
+export class InvalidRequestIdError extends Data.TaggedError(
+  'InvalidRequestIdError'
+)<{
+  readonly message: string
+  readonly input: string
+}> {}
 
 const RequestIdSchema = Schema.compose(
   Schema.Trim,
@@ -26,13 +23,12 @@ export const make = (value: string): EffectType.Effect<RequestId, InvalidRequest
   pipe(
     Schema.decodeUnknown(RequestIdSchema)(value),
     Effect.mapError(
-      parseError => new InvalidRequestIdError(
-        `Invalid RequestId: ${parseError.message}`,
-        value,
-      )
+      parseError => new InvalidRequestIdError({
+        message: `Invalid RequestId: ${parseError.message}`,
+        input: value,
+      })
     ),
-    Effect.map(RequestIdBrand
-    )
+    Effect.map(RequestIdBrand)
   )
 
 export const unwrap = (requestId: RequestId): string => requestId
