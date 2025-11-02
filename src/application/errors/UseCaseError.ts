@@ -30,3 +30,19 @@ export class SessionNotActiveError extends Data.TaggedError(
   readonly currentState: string
   readonly message: string
 }> {}
+
+export class RequestNotFoundError extends Data.TaggedError(
+  'RequestNotFoundError'
+)<{
+  readonly requestId: string
+  readonly message: string
+}> {}
+
+export class InvalidRequestStateError extends Data.TaggedError(
+  'InvalidRequestStateError'
+)<{
+  readonly requestId: string
+  readonly currentState: string
+  readonly expectedState: string
+  readonly message: string
+}> {}
