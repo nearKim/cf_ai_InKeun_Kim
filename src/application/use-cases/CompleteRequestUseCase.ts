@@ -1,7 +1,6 @@
 import { Effect } from 'effect'
 import type * as EffectType from 'effect/Effect'
 import type { RequestId } from '../../domain/value-objects/RequestId'
-import type { StreamChunk } from '../../domain/value-objects/StreamChunk'
 import type { Request } from '../../domain/aggregates/Request'
 import * as RequestAggregate from '../../domain/aggregates/Request'
 import { UnitOfWorkService } from '../services/UnitOfWorkService'
@@ -13,14 +12,17 @@ import type {
   UseCaseExecutionError,
 } from '../errors/UseCaseError'
 
-export interface HandleStreamChunkParams {
+export interface CompleteRequestParams {
   readonly requestId: RequestId
-  readonly chunk: StreamChunk
+  readonly metadata?: {
+    totalTokens?: number
+    stopReason?: 'end_turn' | 'max_tokens' | 'stop_sequence'
+  }
 }
 
-export class HandleStreamChunkUseCase {
+export class CompleteRequestUseCase {
   execute(
-    params: HandleStreamChunkParams
+    params: CompleteRequestParams
   ): EffectType.Effect<
     Request,
     RequestNotFoundError | UseCaseExecutionError,
@@ -34,15 +36,15 @@ export class HandleStreamChunkUseCase {
           return yield* Effect.fail(createRequestNotFoundError(params.requestId))
         }
 
-        const { request: updatedRequest } = yield* RequestAggregate.addChunk(
+        const { request: updatedRequest } = yield* RequestAggregate.complete(
           request,
-          params.chunk
+          params.metadata
         )
 
         yield* uow.requestRepository.save(updatedRequest)
 
         return updatedRequest
       })
-    ).pipe(mapUseCaseError('HandleStreamChunkUseCase', ['RequestNotFoundError']))
+    ).pipe(mapUseCaseError('CompleteRequestUseCase', ['RequestNotFoundError']))
   }
 }

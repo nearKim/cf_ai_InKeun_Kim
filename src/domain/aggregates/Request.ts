@@ -18,6 +18,8 @@ export type Request = {
   readonly receivedAt: number
   readonly completedAt?: number
   readonly failureReason?: string
+  readonly totalTokens?: number
+  readonly stopReason?: 'end_turn' | 'max_tokens' | 'stop_sequence'
 }
 
 export type RequestWithEvents = {
@@ -50,6 +52,8 @@ export const create = (params: {
     receivedAt: now,
     completedAt: undefined,
     failureReason: undefined,
+    totalTokens: undefined,
+    stopReason: undefined,
   })
 
   const event = Constructors.makeRequestReceived({
@@ -100,7 +104,11 @@ export const addChunk = (
 }
 
 export const complete = (
-  request: Request
+  request: Request,
+  metadata?: {
+    totalTokens?: number
+    stopReason?: 'end_turn' | 'max_tokens' | 'stop_sequence'
+  }
 ): EffectType.Effect<RequestWithEvents, InvalidRequestStateError> => {
   if (request.state !== 'Streaming') {
     return Effect.fail(
@@ -118,6 +126,8 @@ export const complete = (
     ...request,
     state: 'Completed' as const,
     completedAt: now,
+    totalTokens: metadata?.totalTokens,
+    stopReason: metadata?.stopReason,
   })
 
   const event = Constructors.makeRequestCompleted({
