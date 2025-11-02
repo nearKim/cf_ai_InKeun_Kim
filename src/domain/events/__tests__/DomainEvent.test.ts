@@ -132,6 +132,52 @@ describe('DomainEvent', () => {
     })
   })
 
+  describe('SessionClosed', () => {
+    it('should create a SessionClosed event without reason', () => {
+      //Given
+      const sessionId = Effect.runSync(SessionId.generate())
+
+      //When
+      const event = Constructors.makeSessionClosed({ sessionId })
+
+      //Then
+      expect(event._tag).toBe('SessionClosed')
+      expect(event.sessionId).toBe(sessionId)
+      expect(event.reason).toBeUndefined()
+      expect(event.timestamp).toBeGreaterThan(0)
+    })
+
+    it('should create a SessionClosed event with reason', () => {
+      //Given
+      const sessionId = Effect.runSync(SessionId.generate())
+      const reason = 'client_disconnect'
+
+      //When
+      const event = Constructors.makeSessionClosed({ sessionId, reason })
+
+      //Then
+      expect(event._tag).toBe('SessionClosed')
+      expect(event.sessionId).toBe(sessionId)
+      expect(event.reason).toBe(reason)
+      expect(event.timestamp).toBeGreaterThan(0)
+    })
+
+    it('should create a SessionClosed event with custom timestamp', () => {
+      //Given
+      const sessionId = Effect.runSync(SessionId.generate())
+      const customTimestamp = 1234567890000
+
+      //When
+      const event = Constructors.makeSessionClosed({
+        sessionId,
+        timestamp: customTimestamp,
+      })
+
+      //Then
+      expect(event.timestamp).toBe(customTimestamp)
+    })
+  })
+
   describe('Pattern Matching', () => {
     it('should match SessionEstablished events', () => {
       //Given
@@ -145,6 +191,7 @@ describe('DomainEvent', () => {
         ResponseChunkReceived: () => 'Chunk received',
         RequestCompleted: () => 'Completed',
         RequestFailed: () => 'Failed',
+        SessionClosed: () => 'Session closed',
       })(event)
 
       //Then
@@ -170,6 +217,7 @@ describe('DomainEvent', () => {
         ResponseChunkReceived: () => 'Chunk',
         RequestCompleted: () => 'Completed',
         RequestFailed: () => 'Failed',
+        SessionClosed: () => 'Closed',
       })(event)
 
       //Then
@@ -193,6 +241,7 @@ describe('DomainEvent', () => {
           e.chunk._tag === 'Delta' ? `Delta: ${e.chunk.content}` : 'Other',
         RequestCompleted: () => 'Completed',
         RequestFailed: () => 'Failed',
+        SessionClosed: () => 'Closed',
       })(event)
 
       //Then
@@ -211,6 +260,7 @@ describe('DomainEvent', () => {
         ResponseChunkReceived: () => 'Chunk',
         RequestCompleted: () => 'Done',
         RequestFailed: () => 'Failed',
+        SessionClosed: () => 'Closed',
       })(event)
 
       //Then
@@ -232,10 +282,34 @@ describe('DomainEvent', () => {
         ResponseChunkReceived: () => 'Chunk',
         RequestCompleted: () => 'Done',
         RequestFailed: (e) => `Error: ${e.error}`,
+        SessionClosed: () => 'Closed',
       })(event)
 
       //Then
       expect(result).toBe('Error: Timeout')
+    })
+
+    it('should match SessionClosed events', () => {
+      //Given
+      const sessionId = Effect.runSync(SessionId.generate())
+      const event = Constructors.makeSessionClosed({
+        sessionId,
+        reason: 'timeout',
+      })
+
+      //When
+      const result = Matchers.matchEvent({
+        SessionEstablished: () => 'Established',
+        RequestReceived: () => 'Request',
+        ResponseChunkReceived: () => 'Chunk',
+        RequestCompleted: () => 'Done',
+        RequestFailed: () => 'Failed',
+        SessionClosed: (e) =>
+          e.reason ? `Closed: ${e.reason}` : 'Closed',
+      })(event)
+
+      //Then
+      expect(result).toBe('Closed: timeout')
     })
   })
 

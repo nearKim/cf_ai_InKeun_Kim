@@ -5,6 +5,7 @@ import type {
   ResponseChunkReceived,
   RequestCompleted,
   RequestFailed,
+  SessionClosed,
 } from './DomainEvent'
 
 export const matchEvent =
@@ -14,6 +15,7 @@ export const matchEvent =
     ResponseChunkReceived: (event: ResponseChunkReceived) => R
     RequestCompleted: (event: RequestCompleted) => R
     RequestFailed: (event: RequestFailed) => R
+    SessionClosed: (event: SessionClosed) => R
   }) =>
   (event: DomainEvent): R => {
     switch (event._tag) {
@@ -27,5 +29,7 @@ export const matchEvent =
         return patterns.RequestCompleted(event)
       case 'RequestFailed':
         return patterns.RequestFailed(event)
+      case 'SessionClosed':
+        return patterns.SessionClosed(event)
     }
   }

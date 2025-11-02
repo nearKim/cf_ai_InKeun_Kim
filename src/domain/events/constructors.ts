@@ -9,6 +9,7 @@ import type {
   ResponseChunkReceived,
   RequestCompleted,
   RequestFailed,
+  SessionClosed,
 } from './DomainEvent'
 
 export const makeSessionEstablished = (params: {
@@ -66,5 +67,17 @@ export const makeRequestFailed = (params: {
     _tag: 'RequestFailed' as const,
     requestId: params.requestId,
     error: params.error,
+    timestamp: params.timestamp ?? Date.now(),
+  })
+
+export const makeSessionClosed = (params: {
+  sessionId: SessionId
+  reason?: string
+  timestamp?: number
+}): SessionClosed =>
+  Data.struct({
+    _tag: 'SessionClosed' as const,
+    sessionId: params.sessionId,
+    reason: params.reason,
     timestamp: params.timestamp ?? Date.now(),
   })

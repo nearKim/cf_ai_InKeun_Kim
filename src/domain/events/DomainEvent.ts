@@ -37,9 +37,17 @@ export type RequestFailed = {
   readonly timestamp: number
 }
 
+export type SessionClosed = {
+  readonly _tag: 'SessionClosed'
+  readonly sessionId: SessionId
+  readonly reason?: string
+  readonly timestamp: number
+}
+
 export type DomainEvent =
   | SessionEstablished
   | RequestReceived
   | ResponseChunkReceived
   | RequestCompleted
   | RequestFailed
+  | SessionClosed
