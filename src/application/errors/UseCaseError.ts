@@ -15,3 +15,18 @@ export class UseCaseExecutionError extends Data.TaggedError(
   readonly message: string
   readonly cause?: RepositoryError | Error
 }> {}
+
+export class SessionNotFoundError extends Data.TaggedError(
+  'SessionNotFoundError'
+)<{
+  readonly sessionId: string
+  readonly message: string
+}> {}
+
+export class SessionNotActiveError extends Data.TaggedError(
+  'SessionNotActiveError'
+)<{
+  readonly sessionId: string
+  readonly currentState: string
+  readonly message: string
+}> {}

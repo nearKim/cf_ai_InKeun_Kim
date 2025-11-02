@@ -37,8 +37,9 @@ export const create = (params: {
   requestId: RequestId
   sessionId: SessionId
   message: ClientMessage
+  timestamp?: number
 }): EffectType.Effect<RequestWithEvents, never> => {
-  const now = Date.now()
+  const now = params.timestamp ?? Date.now()
 
   const request: Request = Data.struct({
     requestId: params.requestId,
