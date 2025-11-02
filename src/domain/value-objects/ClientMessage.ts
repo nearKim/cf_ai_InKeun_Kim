@@ -63,10 +63,7 @@ export const getProviderHint = (
 export const getMaxTokens = (message: ClientMessage): number | undefined =>
   message.maxTokens
 
-export const equals = (a: ClientMessage, b: ClientMessage): boolean =>
-  a.prompt === b.prompt &&
-  Equal.equals(a.providerHint, b.providerHint) &&
-  a.maxTokens === b.maxTokens
+export const equals = Equal.equals
 
 export const toString = (message: ClientMessage): string => {
   const parts: string[] = [`prompt: "${message.prompt}"`]
