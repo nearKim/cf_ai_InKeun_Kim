@@ -85,15 +85,6 @@ export const makeError = (error: string) =>
     )
   )
 
-export const isDelta = (chunk: StreamChunk): chunk is Extract<StreamChunk, { _tag: 'Delta' }> =>
-  chunk._tag === 'Delta'
-
-export const isComplete = (chunk: StreamChunk): chunk is Extract<StreamChunk, { _tag: 'Complete' }> =>
-  chunk._tag === 'Complete'
-
-export const isError = (chunk: StreamChunk): chunk is Extract<StreamChunk, { _tag: 'Error' }> =>
-  chunk._tag === 'Error'
-
 export const match =
   <R>(patterns: {
     Delta: (content: string) => R

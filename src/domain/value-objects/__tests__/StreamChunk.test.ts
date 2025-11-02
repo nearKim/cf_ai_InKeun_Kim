@@ -15,8 +15,7 @@ describe('StreamChunk', () => {
 
         //Then
         expect(chunk._tag).toBe('Delta')
-        expect(StreamChunk.isDelta(chunk)).toBe(true)
-        if (StreamChunk.isDelta(chunk)) {
+        if (chunk._tag === 'Delta') {
           expect(chunk.content).toBe(content)
         }
       })
@@ -41,8 +40,8 @@ describe('StreamChunk', () => {
         const chunk = Effect.runSync(result)
 
         //Then
-        expect(StreamChunk.isDelta(chunk)).toBe(true)
-        if (StreamChunk.isDelta(chunk)) {
+        expect(chunk._tag).toBe('Delta')
+        if (chunk._tag === 'Delta') {
           expect(chunk.content).toBe(whitespace)
         }
       })
@@ -57,8 +56,7 @@ describe('StreamChunk', () => {
 
         //Then
         expect(chunk._tag).toBe('Complete')
-        expect(StreamChunk.isComplete(chunk)).toBe(true)
-        if (StreamChunk.isComplete(chunk)) {
+        if (chunk._tag === 'Complete') {
           expect(chunk.totalTokens).toBeUndefined()
         }
       })
@@ -71,8 +69,8 @@ describe('StreamChunk', () => {
         const chunk = StreamChunk.makeComplete(totalTokens)
 
         //Then
-        expect(StreamChunk.isComplete(chunk)).toBe(true)
-        if (StreamChunk.isComplete(chunk)) {
+        expect(chunk._tag).toBe('Complete')
+        if (chunk._tag === 'Complete') {
           expect(chunk.totalTokens).toBe(totalTokens)
         }
       })
@@ -115,8 +113,7 @@ describe('StreamChunk', () => {
 
         //Then
         expect(chunk._tag).toBe('Error')
-        expect(StreamChunk.isError(chunk)).toBe(true)
-        if (StreamChunk.isError(chunk)) {
+        if (chunk._tag === 'Error') {
           expect(chunk.error).toBe(error)
         }
       })
@@ -141,48 +138,10 @@ describe('StreamChunk', () => {
         const chunk = Effect.runSync(result)
 
         //Then
-        if (StreamChunk.isError(chunk)) {
+        if (chunk._tag === 'Error') {
           expect(chunk.error).toBe('Connection failed')
         }
       })
-    })
-  })
-
-  describe('Type Guards', () => {
-    it('should correctly identify Delta chunks', () => {
-      //Given
-      const delta = Effect.runSync(StreamChunk.makeDelta('content'))
-      const complete = StreamChunk.makeComplete()
-      const error = Effect.runSync(StreamChunk.makeError('error'))
-
-      //When & Then
-      expect(StreamChunk.isDelta(delta)).toBe(true)
-      expect(StreamChunk.isDelta(complete)).toBe(false)
-      expect(StreamChunk.isDelta(error)).toBe(false)
-    })
-
-    it('should correctly identify Complete chunks', () => {
-      //Given
-      const delta = Effect.runSync(StreamChunk.makeDelta('content'))
-      const complete = StreamChunk.makeComplete()
-      const error = Effect.runSync(StreamChunk.makeError('error'))
-
-      //When & Then
-      expect(StreamChunk.isComplete(delta)).toBe(false)
-      expect(StreamChunk.isComplete(complete)).toBe(true)
-      expect(StreamChunk.isComplete(error)).toBe(false)
-    })
-
-    it('should correctly identify Error chunks', () => {
-      //Given
-      const delta = Effect.runSync(StreamChunk.makeDelta('content'))
-      const complete = StreamChunk.makeComplete()
-      const error = Effect.runSync(StreamChunk.makeError('error'))
-
-      //When & Then
-      expect(StreamChunk.isError(delta)).toBe(false)
-      expect(StreamChunk.isError(complete)).toBe(false)
-      expect(StreamChunk.isError(error)).toBe(true)
     })
   })
 
