@@ -21,8 +21,11 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node", "@cloudflare/workers-types", "@cloudflare/vitest-pool-workers"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "!node_modules/@cloudflare/vitest-pool-workers"]
 }
