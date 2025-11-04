@@ -1,11 +1,16 @@
 import { Effect, Data } from 'effect'
 import type * as EffectType from 'effect/Effect'
-import type { SqlStorage, SqlStorageValue, SqlStorageCursor } from '@cloudflare/workers-types/experimental'
+import type {
+  DurableObjectState,
+  SqlStorage,
+  SqlStorageValue,
+  SqlStorageCursor
+} from '@cloudflare/workers-types'
 
 /**
  * Re-export CloudFlare types for convenience
  */
-export type { SqlStorage, SqlStorageValue, SqlStorageCursor }
+export type { SqlStorage, SqlStorageValue, SqlStorageCursor, DurableObjectState }
 
 export class SqlExecutionError extends Data.TaggedError('SqlExecutionError')<{
   readonly message: string

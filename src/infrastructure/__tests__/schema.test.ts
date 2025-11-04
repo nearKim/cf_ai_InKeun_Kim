@@ -15,7 +15,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
 
     await runInDurableObject(stub, async (_instance, state) => {
       await state.storage.deleteAll()
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
       await Effect.runPromise(
         sqlExecutor.execute(SessionRecord.CREATE_TABLE_SQL)
@@ -30,7 +29,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
 
     // When & Then
     await runInDurableObject(stub, async (_instance, state) => {
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       await Effect.runPromise(
@@ -71,7 +69,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
 
     // When & Then
     await runInDurableObject(stub, async (_instance, state) => {
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       await Effect.runPromise(
@@ -100,7 +97,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
   test('no request persistence table exists', async () => {
     await runInDurableObject(stub, async (_instance, state) => {
       // Given
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       // When
@@ -125,7 +121,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
     const sessionId = 'session-789'
 
     await runInDurableObject(stub, async (_instance, state) => {
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       // When
@@ -159,7 +154,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
     const invalidState = 'InvalidState'
 
     await runInDurableObject(stub, async (_instance, state) => {
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       // When
@@ -189,7 +183,6 @@ describe('CloudFlare Schema - Privacy Integration Tests', () => {
     const requestIds = ['req-a', 'req-b', 'req-c', 'req-d']
 
     await runInDurableObject(stub, async (_instance, state) => {
-      // @ts-expect-error - CloudFlare test SqlStorage type differs slightly from production but is compatible
       const sqlExecutor = createSqlExecutor(state.storage.sql)
 
       // When
