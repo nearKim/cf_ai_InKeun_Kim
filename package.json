@@ -13,6 +13,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@cloudflare/agents": "^0.0.16",
     "effect": "^3.18.4"
   },
   "devDependencies": {
