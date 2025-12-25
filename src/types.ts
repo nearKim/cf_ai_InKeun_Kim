@@ -1,5 +1,5 @@
 export interface Env {
-  SESSIONS: DurableObjectNamespace
+  SessionAgent: DurableObjectNamespace
   AUTH_SECRET_KEY: string
   ALLOWED_ORIGIN?: string
   ALLOWED_HOME_SERVER_PATTERN?: string

@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [durable_objects]
 bindings = [
-  { name = "SESSIONS", class_name = "SessionAgent" }
+  { name = "SessionAgent", class_name = "SessionAgent" }
 ]
 
 [[migrations]]
