@@ -15,3 +15,4 @@ new_classes = ["SessionAgent"]
 [vars]
 MESSAGE_QUEUE_LIMIT = "100"
 ALLOWED_HOME_SERVER_PATTERN = "^wss://.*\\.nearkim\\.dev$"
+ALLOWED_ORIGIN = "https://app.nearkim.dev"
