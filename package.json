@@ -33,7 +33,7 @@
     "typescript": "^5.5.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.0",
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.54.0"
   },
   "private": true
 }
