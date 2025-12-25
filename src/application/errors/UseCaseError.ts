@@ -31,18 +31,29 @@ export class SessionNotActiveError extends Data.TaggedError(
   readonly message: string
 }> {}
 
-export class RequestNotFoundError extends Data.TaggedError(
-  'RequestNotFoundError'
-)<{
-  readonly requestId: string
+export class QueueFullError extends Data.TaggedError('QueueFullError')<{
+  readonly sessionId: string
+  readonly queueLimit: number
   readonly message: string
 }> {}
 
-export class InvalidRequestStateError extends Data.TaggedError(
-  'InvalidRequestStateError'
+export class SessionExpiredError extends Data.TaggedError(
+  'SessionExpiredError'
 )<{
-  readonly requestId: string
-  readonly currentState: string
-  readonly expectedState: string
+  readonly sessionId: string
+  readonly message: string
+}> {}
+
+export class InvalidMessageError extends Data.TaggedError(
+  'InvalidMessageError'
+)<{
+  readonly reason: string
+  readonly message: string
+}> {}
+
+export class HomeServerUnavailableError extends Data.TaggedError(
+  'HomeServerUnavailableError'
+)<{
+  readonly sessionId: string
   readonly message: string
 }> {}

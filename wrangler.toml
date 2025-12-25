@@ -1,0 +1,17 @@
+name = "cf_ai_session_router"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[durable_objects]
+bindings = [
+  { name = "SESSIONS", class_name = "SessionAgent" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["SessionAgent"]
+
+[vars]
+MESSAGE_QUEUE_LIMIT = "100"
+ALLOWED_HOME_SERVER_PATTERN = "^wss://.*\\.nearkim\\.dev$"
