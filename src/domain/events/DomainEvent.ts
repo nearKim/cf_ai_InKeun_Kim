@@ -1,53 +1,81 @@
-import type { SessionId } from '../value-objects/SessionId'
-import type { RequestId } from '../value-objects/RequestId'
-import type { ClientMessage } from '../value-objects/ClientMessage'
-import type { StreamChunk } from '../value-objects/StreamChunk'
-
 export type SessionEstablished = {
   readonly _tag: 'SessionEstablished'
-  readonly sessionId: SessionId
-  readonly timestamp: number
-}
-
-export type RequestReceived = {
-  readonly _tag: 'RequestReceived'
-  readonly requestId: RequestId
-  readonly sessionId: SessionId
-  readonly message: ClientMessage
-  readonly timestamp: number
-}
-
-export type ResponseChunkReceived = {
-  readonly _tag: 'ResponseChunkReceived'
-  readonly requestId: RequestId
-  readonly chunk: StreamChunk
-  readonly timestamp: number
-}
-
-export type RequestCompleted = {
-  readonly _tag: 'RequestCompleted'
-  readonly requestId: RequestId
-  readonly timestamp: number
-}
-
-export type RequestFailed = {
-  readonly _tag: 'RequestFailed'
-  readonly requestId: RequestId
-  readonly error: string
+  readonly sessionId: string
   readonly timestamp: number
 }
 
 export type SessionClosed = {
   readonly _tag: 'SessionClosed'
-  readonly sessionId: SessionId
+  readonly sessionId: string
   readonly reason?: string
+  readonly timestamp: number
+}
+
+export type SessionIdled = {
+  readonly _tag: 'SessionIdled'
+  readonly sessionId: string
+  readonly timestamp: number
+}
+
+export type SessionExpired = {
+  readonly _tag: 'SessionExpired'
+  readonly sessionId: string
+  readonly timestamp: number
+}
+
+export type ClientConnected = {
+  readonly _tag: 'ClientConnected'
+  readonly sessionId: string
+  readonly connectionId: string
+  readonly userId: string
+  readonly timestamp: number
+}
+
+export type ClientDisconnected = {
+  readonly _tag: 'ClientDisconnected'
+  readonly sessionId: string
+  readonly connectionId: string
+  readonly reason?: string
+  readonly timestamp: number
+}
+
+export type HomeServerConnected = {
+  readonly _tag: 'HomeServerConnected'
+  readonly sessionId: string
+  readonly homeServerUrl: string
+  readonly timestamp: number
+}
+
+export type HomeServerDisconnected = {
+  readonly _tag: 'HomeServerDisconnected'
+  readonly sessionId: string
+  readonly reason?: string
+  readonly timestamp: number
+}
+
+export type MessageQueued = {
+  readonly _tag: 'MessageQueued'
+  readonly sessionId: string
+  readonly messageId: string
+  readonly queueSize: number
+  readonly timestamp: number
+}
+
+export type QueueFlushed = {
+  readonly _tag: 'QueueFlushed'
+  readonly sessionId: string
+  readonly messageCount: number
   readonly timestamp: number
 }
 
 export type DomainEvent =
   | SessionEstablished
-  | RequestReceived
-  | ResponseChunkReceived
-  | RequestCompleted
-  | RequestFailed
   | SessionClosed
+  | SessionIdled
+  | SessionExpired
+  | ClientConnected
+  | ClientDisconnected
+  | HomeServerConnected
+  | HomeServerDisconnected
+  | MessageQueued
+  | QueueFlushed
