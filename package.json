@@ -14,12 +14,14 @@
   },
   "dependencies": {
     "@cloudflare/agents": "^0.0.16",
-    "effect": "^3.18.4"
+    "effect": "^3.18.4",
+    "jose": "^6.1.3"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.0",
     "@cloudflare/workers-types": "^4.20.0",
     "@effect/schema": "^0.75.5",
+    "@effect/vitest": "^0.27.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.9.2",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
