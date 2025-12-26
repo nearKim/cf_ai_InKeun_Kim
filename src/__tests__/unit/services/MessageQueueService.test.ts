@@ -67,7 +67,9 @@ describe('MessageQueueService', () => {
 
   beforeEach(() => {
     mockSql = createMockSql()
-    service = createMessageQueueService(mockSql.sql)
+    service = createMessageQueueService(
+      mockSql.sql as <T>(strings: TemplateStringsArray, ...values: unknown[]) => T[]
+    )
   })
 
   const createTestEnvelope = (id?: string): MessageEnvelope =>
@@ -181,9 +183,9 @@ describe('MessageQueueService', () => {
         const result = yield* service.getAll()
 
         expect(result.length).toBe(3)
-        expect(result[0].id).toBe('id-1')
-        expect(result[1].id).toBe('id-2')
-        expect(result[2].id).toBe('id-3')
+        expect(result[0]!.id).toBe('id-1')
+        expect(result[1]!.id).toBe('id-2')
+        expect(result[2]!.id).toBe('id-3')
       })
     )
 
