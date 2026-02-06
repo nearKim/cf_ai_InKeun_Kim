@@ -9,6 +9,12 @@ import {
   HomeServerConnectionError,
   QueueOperationError,
 } from '../errors'
+
+const buildHomeServerWsUrl = (baseUrl: string, token: string): string => {
+  const url = new URL('/ws', baseUrl.replace(/^wss:/, 'https:').replace(/^ws:/, 'http:'))
+  url.searchParams.set('token', token)
+  return url.toString().replace(/^https:/, 'wss:').replace(/^http:/, 'ws:')
+}
 import { extractToken } from '../utils'
 import {
   createStatusMessage,
@@ -85,11 +91,12 @@ export const activateIfIdle = (
 export const connectHomeServerIfNeeded = (
   homeServerUrl: string,
   services: SessionServices
-): Effect.Effect<void, HomeServerConnectionError | QueueOperationError> =>
+): Effect.Effect<void, HomeServerConnectionError | QueueOperationError | AuthenticationError> =>
   Effect.gen(function* () {
     const connected = yield* services.homeServer.isConnected()
     if (!connected) {
-      yield* services.homeServer.connect(homeServerUrl)
+      const token = yield* services.auth.generateBackendToken()
+      yield* services.homeServer.connect(buildHomeServerWsUrl(homeServerUrl, token))
       yield* services.router.flush()
     }
   })
@@ -116,10 +123,11 @@ export const sendStatusMessage = (
 export const reconnectIfActiveWithStoredUrl = (
   storedUrl: string | undefined,
   services: SessionServices
-): Effect.Effect<void, HomeServerConnectionError | QueueOperationError> =>
+): Effect.Effect<void, HomeServerConnectionError | QueueOperationError | AuthenticationError> =>
   Effect.gen(function* () {
     if (storedUrl && services.state.isActive()) {
-      yield* services.homeServer.connect(storedUrl)
+      const token = yield* services.auth.generateBackendToken()
+      yield* services.homeServer.connect(buildHomeServerWsUrl(storedUrl, token))
       yield* services.router.flush()
     }
   })
