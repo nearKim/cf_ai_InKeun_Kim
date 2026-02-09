@@ -2,7 +2,6 @@ import { it, describe } from '@effect/vitest'
 import { Effect, Either, Exit } from 'effect'
 import { expect, beforeEach, vi } from 'vitest'
 import { createMessageQueueService, type MessageQueueService } from '../../../services'
-import { createEnvelope, type MessageEnvelope } from '../../../validation'
 import { QueueFullError, QueueOperationError } from '../../../errors'
 
 type MockRow = Record<string, unknown>
@@ -72,8 +71,13 @@ describe('MessageQueueService', () => {
     )
   })
 
-  const createTestEnvelope = (id?: string): MessageEnvelope =>
-    createEnvelope({ id: id ?? crypto.randomUUID(), payload: 'test' })
+  const createTestRawJson = (id?: string): { id: string; rawJson: string } => {
+    const messageId = id ?? crypto.randomUUID()
+    return {
+      id: messageId,
+      rawJson: JSON.stringify({ id: messageId, timestamp: Date.now(), payload: 'test' }),
+    }
+  }
 
   describe('ensureSchema', () => {
     it.effect('should create table', () =>
@@ -103,9 +107,9 @@ describe('MessageQueueService', () => {
   describe('enqueue', () => {
     it.effect('should insert message when under limit', () =>
       Effect.gen(function* () {
-        const envelope = createTestEnvelope('test-id-1')
+        const msg = createTestRawJson('test-id-1')
 
-        yield* service.enqueue(envelope, 10)
+        yield* service.enqueue(msg.id, msg.rawJson, 10)
 
         expect(mockSql.getData().size).toBe(1)
         expect(mockSql.getData().has('test-id-1')).toBe(true)
@@ -115,10 +119,12 @@ describe('MessageQueueService', () => {
     it.effect('should fail when queue is full', () =>
       Effect.gen(function* () {
         for (let i = 0; i < 5; i++) {
-          yield* service.enqueue(createTestEnvelope(), 10)
+          const msg = createTestRawJson()
+          yield* service.enqueue(msg.id, msg.rawJson, 10)
         }
 
-        const result = yield* Effect.either(service.enqueue(createTestEnvelope(), 5))
+        const msg = createTestRawJson()
+        const result = yield* Effect.either(service.enqueue(msg.id, msg.rawJson, 5))
 
         expect(Either.isLeft(result)).toBe(true)
         if (Either.isLeft(result)) {
@@ -133,10 +139,12 @@ describe('MessageQueueService', () => {
     it.effect('should allow enqueue when at limit minus one', () =>
       Effect.gen(function* () {
         for (let i = 0; i < 4; i++) {
-          yield* service.enqueue(createTestEnvelope(), 5)
+          const msg = createTestRawJson()
+          yield* service.enqueue(msg.id, msg.rawJson, 5)
         }
 
-        yield* service.enqueue(createTestEnvelope(), 5)
+        const msg = createTestRawJson()
+        yield* service.enqueue(msg.id, msg.rawJson, 5)
 
         expect(mockSql.getData().size).toBe(5)
       })
@@ -146,8 +154,8 @@ describe('MessageQueueService', () => {
   describe('dequeue', () => {
     it.effect('should remove message by id', () =>
       Effect.gen(function* () {
-        const envelope = createTestEnvelope('test-id-1')
-        yield* service.enqueue(envelope, 10)
+        const msg = createTestRawJson('test-id-1')
+        yield* service.enqueue(msg.id, msg.rawJson, 10)
 
         yield* service.dequeue('test-id-1')
 
@@ -172,13 +180,13 @@ describe('MessageQueueService', () => {
 
     it.effect('should return messages ordered by queued_at', () =>
       Effect.gen(function* () {
-        const envelope1 = createTestEnvelope('id-1')
-        const envelope2 = createTestEnvelope('id-2')
-        const envelope3 = createTestEnvelope('id-3')
+        const msg1 = createTestRawJson('id-1')
+        const msg2 = createTestRawJson('id-2')
+        const msg3 = createTestRawJson('id-3')
 
-        yield* service.enqueue(envelope1, 10)
-        yield* service.enqueue(envelope2, 10)
-        yield* service.enqueue(envelope3, 10)
+        yield* service.enqueue(msg1.id, msg1.rawJson, 10)
+        yield* service.enqueue(msg2.id, msg2.rawJson, 10)
+        yield* service.enqueue(msg3.id, msg3.rawJson, 10)
 
         const result = yield* service.getAll()
 
@@ -191,8 +199,8 @@ describe('MessageQueueService', () => {
 
     it.effect('should return message with correct structure', () =>
       Effect.gen(function* () {
-        const envelope = createTestEnvelope('test-id')
-        yield* service.enqueue(envelope, 10)
+        const msg = createTestRawJson('test-id')
+        yield* service.enqueue(msg.id, msg.rawJson, 10)
 
         const result = yield* service.getAll()
 
@@ -213,9 +221,10 @@ describe('MessageQueueService', () => {
 
     it.effect('should return correct count', () =>
       Effect.gen(function* () {
-        yield* service.enqueue(createTestEnvelope(), 10)
-        yield* service.enqueue(createTestEnvelope(), 10)
-        yield* service.enqueue(createTestEnvelope(), 10)
+        for (let i = 0; i < 3; i++) {
+          const msg = createTestRawJson()
+          yield* service.enqueue(msg.id, msg.rawJson, 10)
+        }
 
         const count = yield* service.count()
         expect(count).toBe(3)
@@ -226,8 +235,10 @@ describe('MessageQueueService', () => {
   describe('clear', () => {
     it.effect('should remove all messages', () =>
       Effect.gen(function* () {
-        yield* service.enqueue(createTestEnvelope(), 10)
-        yield* service.enqueue(createTestEnvelope(), 10)
+        for (let i = 0; i < 2; i++) {
+          const msg = createTestRawJson()
+          yield* service.enqueue(msg.id, msg.rawJson, 10)
+        }
 
         yield* service.clear()
 

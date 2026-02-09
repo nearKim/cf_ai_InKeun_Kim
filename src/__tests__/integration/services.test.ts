@@ -7,8 +7,7 @@ import {
   createMessageQueueService,
   createAuthenticationService,
 } from '../../services'
-import { createEnvelope, createTestToken } from '../../validation'
-import { createEffectRunner } from '../../utils'
+import { createTestToken } from '../../validation'
 import type { SessionState } from '../../types'
 
 describe('Services Integration', () => {
@@ -116,8 +115,8 @@ describe('Services Integration', () => {
         const queueService = createMessageQueueService(createMockSql())
 
         yield* queueService.ensureSchema()
-        yield* queueService.enqueue(createEnvelope({ payload: 'test1' }), 10)
-        yield* queueService.enqueue(createEnvelope({ payload: 'test2' }), 10)
+        yield* queueService.enqueue('id-1', '{"payload":"test1"}', 10)
+        yield* queueService.enqueue('id-2', '{"payload":"test2"}', 10)
 
         const count = yield* queueService.count()
         expect(count).toBe(2)
@@ -134,11 +133,11 @@ describe('Services Integration', () => {
         yield* queueService.ensureSchema()
 
         for (let i = 0; i < 5; i++) {
-          yield* queueService.enqueue(createEnvelope({ payload: `msg${i}` }), 5)
+          yield* queueService.enqueue(`id-${i}`, `{"payload":"msg${i}"}`, 5)
         }
 
         const result = yield* Effect.either(
-          queueService.enqueue(createEnvelope({ payload: 'overflow' }), 5)
+          queueService.enqueue('overflow-id', '{"payload":"overflow"}', 5)
         )
 
         expect(Either.isLeft(result)).toBe(true)
@@ -266,8 +265,7 @@ describe('Services Integration', () => {
         yield* stateService.update({ type: 'SET_HOME_SERVER', homeServer: 'online' })
         expect(currentState.homeServer).toBe('online')
 
-        const envelope = createEnvelope({ payload: 'user message' })
-        yield* queueService.enqueue(envelope, 100)
+        yield* queueService.enqueue('msg-1', '{"payload":"user message"}', 100)
 
         const count = yield* queueService.count()
         yield* stateService.update({ type: 'SET_QUEUE_DEPTH', queueDepth: count })

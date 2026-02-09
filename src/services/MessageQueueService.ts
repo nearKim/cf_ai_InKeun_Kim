@@ -1,7 +1,5 @@
 import { Effect } from 'effect'
 import { QueueFullError, QueueOperationError } from '../errors'
-import type { MessageEnvelope } from '../validation'
-import { serializeEnvelope } from '../validation'
 
 export type QueuedMessage = {
   readonly id: string
@@ -11,7 +9,8 @@ export type QueuedMessage = {
 
 export interface MessageQueueService {
   readonly enqueue: (
-    envelope: MessageEnvelope,
+    id: string,
+    rawJson: string,
     limit: number
   ) => Effect.Effect<void, QueueFullError | QueueOperationError>
   readonly dequeue: (id: string) => Effect.Effect<void, QueueOperationError>
@@ -30,7 +29,7 @@ type MessageQueueRow = {
 }
 
 export const createMessageQueueService = (sql: SqlExecutor): MessageQueueService => ({
-  enqueue: (envelope, limit) =>
+  enqueue: (id, rawJson, limit) =>
     Effect.gen(function* () {
       const countResult = yield* Effect.try({
         try: () => {
@@ -55,7 +54,7 @@ export const createMessageQueueService = (sql: SqlExecutor): MessageQueueService
         try: () => {
           sql`
             INSERT INTO message_queue (id, envelope_json, queued_at)
-            VALUES (${envelope.id}, ${serializeEnvelope(envelope)}, ${Date.now()})
+            VALUES (${id}, ${rawJson}, ${Date.now()})
           `
         },
         catch: (error) =>

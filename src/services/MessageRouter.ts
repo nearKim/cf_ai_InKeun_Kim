@@ -1,9 +1,7 @@
 import { Effect, pipe } from 'effect'
-import type { MessageEnvelope } from '../validation'
 import type { HomeServerService } from './HomeServerService'
 import type { MessageQueueService } from './MessageQueueService'
 import type { StateService } from './StateService'
-import { serializeEnvelope } from '../validation'
 import { QueueOperationError } from '../errors'
 import { log } from '../logger'
 
@@ -13,7 +11,7 @@ export type RouteResult =
   | { readonly _tag: 'QueueFull'; readonly retryAfter: number }
 
 export interface MessageRouter {
-  readonly route: (envelope: MessageEnvelope) => Effect.Effect<RouteResult, QueueOperationError>
+  readonly route: (rawJson: string, id: string) => Effect.Effect<RouteResult, QueueOperationError>
   readonly flush: () => Effect.Effect<number, QueueOperationError>
   readonly syncQueueDepth: () => Effect.Effect<void, QueueOperationError>
 }
@@ -41,10 +39,11 @@ export const createMessageRouter = (
     )
 
   const queueMessage = (
-    envelope: MessageEnvelope
+    rawJson: string,
+    id: string
   ): Effect.Effect<RouteResult, QueueOperationError> =>
     pipe(
-      queue.enqueue(envelope, queueLimit),
+      queue.enqueue(id, rawJson, queueLimit),
       Effect.flatMap(() => syncQueueDepth),
       Effect.map(() => ({ _tag: 'Queued' as const })),
       Effect.catchTag('QueueFullError', (err) => {
@@ -61,17 +60,17 @@ export const createMessageRouter = (
     )
 
   return {
-    route: (envelope) =>
+    route: (rawJson, id) =>
       pipe(
         homeServer.isConnected(),
         Effect.flatMap((connected) =>
           connected
             ? pipe(
-                homeServer.send(serializeEnvelope(envelope)),
+                homeServer.send(rawJson),
                 Effect.map(() => ({ _tag: 'Sent' as const })),
-                Effect.catchTag('HomeServerSendError', () => queueMessage(envelope))
+                Effect.catchTag('HomeServerSendError', () => queueMessage(rawJson, id))
               )
-            : queueMessage(envelope)
+            : queueMessage(rawJson, id)
         )
       ),
 

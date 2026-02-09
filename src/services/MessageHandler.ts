@@ -45,13 +45,14 @@ const routeResultToResponse = (result: RouteResult): MessageResponse =>
     : { _tag: 'NoReply' }
 
 const handleEnvelope = (
-  data: MessageEnvelope,
+  raw: string,
+  id: string,
   router: MessageRouter,
   state: StateService
 ): Effect.Effect<MessageResponse, QueueOperationError> =>
   pipe(
     state.update({ type: 'TOUCH_ACTIVITY' }),
-    Effect.flatMap(() => router.route(data)),
+    Effect.flatMap(() => router.route(raw, id)),
     Effect.map(routeResultToResponse)
   )
 
@@ -74,6 +75,6 @@ export const handleMessage = (
           message: serializeErrorMessage(invalidMessageError(msg.reason)),
         } as const
       case 'envelope':
-        return yield* handleEnvelope(msg.data, router, state)
+        return yield* handleEnvelope(raw, msg.data.id, router, state)
     }
   })
